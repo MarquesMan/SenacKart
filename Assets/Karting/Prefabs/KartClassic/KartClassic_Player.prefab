@@ -451,6 +451,7 @@ GameObject:
   - component: {fileID: 5159474304760194895}
   - component: {fileID: -784875384270602922}
   - component: {fileID: 4326104784911330452}
+  - component: {fileID: 3730880051983372794}
   m_Layer: 2
   m_Name: KartClassic_Player
   m_TagString: Player
@@ -654,6 +655,20 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+--- !u!114 &3730880051983372794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3934862071804020761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95decfb20e347b44284d985bf4ff67e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
 --- !u!1 &3934862071846582731
 GameObject:
   m_ObjectHideFlags: 0

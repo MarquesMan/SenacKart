@@ -123,7 +123,7 @@ namespace KartGame.KartSystems
         Quaternion suspensionNeutralRot;
 
         // the input sources that can control the kart
-        IInput[] m_Inputs;
+        public IInput[] m_Inputs;
 
         // can the kart move?
         bool canMove = true;
