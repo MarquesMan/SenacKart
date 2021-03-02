@@ -30,11 +30,19 @@ public class ArcadeKartPowerup : MonoBehaviour {
 
             if (Time.time - lastActivatedTimestamp > cooldown) {
                 //finished cooldown!
+                this.boostStats.ElapsedTime = 0f;
                 isCoolingDown = false;
                 onPowerupFinishCooldown.Invoke();
+                this.GetComponent<Collider>().enabled = true;
+                ToogleMesh(true);
             }
 
         }
+    }
+
+    private void ToogleMesh(bool state)
+    {
+        foreach (MeshRenderer mesh in GetComponentsInChildren<MeshRenderer>()) mesh.enabled = state;
     }
 
 
@@ -54,7 +62,11 @@ public class ArcadeKartPowerup : MonoBehaviour {
                 onPowerupActivated.Invoke();
                 isCoolingDown = true;
 
-                if (disableGameObjectWhenActivated) this.gameObject.SetActive(false);
+                if (disableGameObjectWhenActivated)
+                {
+                    this.GetComponent<Collider>().enabled = false;
+                    ToogleMesh(false);
+                }
             }
         }
     }

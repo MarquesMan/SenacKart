@@ -131,12 +131,15 @@ namespace KartGame.KartSystems
         GameObject lastGroundCollided = null;
         ArcadeKart.Stats finalStats;
 
+        public TrailRenderer exhaustTrail;
+
         void Awake()
         {
             Rigidbody = GetComponent<Rigidbody>();
             m_Inputs = GetComponents<IInput>();
             suspensionNeutralPos = SuspensionBody.transform.localPosition;
             suspensionNeutralRot = SuspensionBody.transform.localRotation;
+            if(exhaustTrail != null) exhaustTrail.emitting = false;
         }
 
         void FixedUpdate()
@@ -208,6 +211,12 @@ namespace KartGame.KartSystems
                 // add up the powerups
                 powerups += p.modifiers;
             }
+
+            if (exhaustTrail!=null && (exhaustTrail.emitting != powerups.Acceleration > 0))
+            {
+                exhaustTrail.emitting = powerups.Acceleration > 0;
+            }
+
 
             // add powerups to our final stats
             finalStats = baseStats + powerups;

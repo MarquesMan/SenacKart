@@ -16,8 +16,13 @@ public class PlayerKart : NetworkBehaviour
         }
         else
         {
-
             GetComponent<KartGame.KartSystems.ArcadeKart>().m_Inputs = new KartGame.KartSystems.IInput[] { };
+
+            foreach(CapsuleCollider capsuleCollider in GetComponentsInChildren<CapsuleCollider>())
+            {
+                capsuleCollider.gameObject.layer = LayerMask.NameToLayer("OtherKart");
+            }
+
         }
     }
 
