@@ -15,7 +15,8 @@ public class CheckPoint : MonoBehaviour
     {
 
         if (other.CompareTag("Player")) return;
-
+        Debug.Log(other.GetComponentInParent<NetworkIdentity>().netId);
+        
         // Avisar o LapCounter que passamos um checkpoint
         lapCounter.PlayerPassedCheckPoint(
             other.GetComponentInParent<NetworkIdentity>(),
