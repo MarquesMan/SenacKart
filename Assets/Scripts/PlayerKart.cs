@@ -10,6 +10,8 @@ public class PlayerKart : NetworkBehaviour
     [SyncVar(hook =nameof(SetTextMeshValue))]
     private string playerName = "Missing";
 
+    public string GetPlayerName() => playerName;
+
     private void SetTextMeshValue(string oldName, string newName)
     {
         GetComponentInChildren<TMPro.TextMeshPro>().SetText(newName);
@@ -34,7 +36,7 @@ public class PlayerKart : NetworkBehaviour
             try
             {
                 GetComponent<KartGame.KartSystems.ArcadeKart>().m_Inputs = new KartGame.KartSystems.IInput[] { };
-            }catch (System.NullReferenceException e)
+            }catch (System.NullReferenceException _)
             {
                 //pass
             }
