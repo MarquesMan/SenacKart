@@ -18,23 +18,46 @@ public class LapCounter : NetworkBehaviour
     [SerializeField]
     UnityEngine.UI.Text scoreText;
 
+    int playerCount = 0,
+        finishedPlayers = 0;
+
+    Dictionary<uint, bool> finishedById = new Dictionary<uint, bool>();
+
     public override void OnStartClient()
     {
         lapDict.Callback += UpdateDict;
     }
 
+    private class ScoreComparer : IComparer<int>
+    {
+        public int Compare(int x, int y)
+        {
+            var result = y - x;
+
+            if (result == 0) // Quando os dois sao iguais
+                return -1;
+            else
+                return result;
+        }
+    }
+
+
     private void UpdateDict(SyncIDictionary<uint, PlayerNameAndLap>.Operation op, uint key, PlayerNameAndLap item)
     {
-        // Debug.Log($"Player :{item.playerName} Volta:{item.currentLap}");
+        Debug.Log($"Player :{item.playerName} Volta:{item.score}");
 
         System.Text.StringBuilder scoreTextString = new System.Text.StringBuilder("");
 
-        //foreach (uint dictKey in lapDict.Keys) Debug.Log(dictKey);
+        var scoreList = new SortedList<int, string>(new ScoreComparer());
 
-        foreach(PlayerNameAndLap values in lapDict.Values)
+        foreach (PlayerNameAndLap values in lapDict.Values)
         {
-            // "" + "Player: X Volta: N\n"
-            scoreTextString.AppendLine($"{values.playerName} : {values.currentLap}");
+            scoreList.Add( values.score, values.playerName );
+        }
+
+        for(int i = 0; i < scoreList.Count; ++i)
+        {
+            scoreTextString.AppendLine($"{scoreList.Values[i]} : {i+1}º");
         }
 
         scoreText.text = scoreTextString.ToString();
@@ -43,7 +66,7 @@ public class LapCounter : NetworkBehaviour
     public struct PlayerNameAndLap
     {
         public string playerName;
-        public int currentLap;
+        public int score;
     }
 
     [Server]
@@ -70,7 +93,7 @@ public class LapCounter : NetworkBehaviour
         // Verificar se o checkpoint eh o checkpoint 0
   
         var tempPlayerNameAndLap = lapDict[networkID];
-        tempPlayerNameAndLap.currentLap += 1;//currentCheckPoint == 0? 1 : 0;
+        tempPlayerNameAndLap.score += 1; //currentCheckPoint == 0? 1 : 0;
         lapDict[networkID] = tempPlayerNameAndLap;
         
 
@@ -86,9 +109,11 @@ public class LapCounter : NetworkBehaviour
         lapDict.Add(id.netId, new PlayerNameAndLap
         {
             playerName = id.gameObject.GetComponent<PlayerKart>().GetPlayerName(),
-            currentLap = -1
+            score = 0
         });
         checkPointDict[id.netId] = 0;
+        finishedById[id.netId] = false;
+        playerCount += 1;
 
     }
 }
