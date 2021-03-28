@@ -23,9 +23,39 @@ public class LapCounter : NetworkBehaviour
 
     Dictionary<uint, bool> finishedById = new Dictionary<uint, bool>();
 
+    [SerializeField]
+    private List<Transform> winPositions;
+
+    [SerializeField]
+    int maxLaps = 1;
+
+    public Transform cameraWinPosition, cameraWinLookAt;
+
+
+    private void ResetVariables()
+    {
+        lapDict = new SyncDictionary<uint, PlayerNameAndLap>();
+        checkPointDict = new Dictionary<uint, int>();
+        finishedById = new Dictionary<uint, bool>();
+        playerCount = 0;
+        finishedPlayers = 0;
+    }
+
+    public override void OnStartServer()
+    {
+        ResetVariables();
+    }
+
     public override void OnStartClient()
     {
+        playerCount += 1;
         lapDict.Callback += UpdateDict;
+    }
+
+    public override void OnStopClient()
+    {
+        lapDict.Callback -= UpdateDict;
+        scoreText.text = "";
     }
 
     private class ScoreComparer : IComparer<int>
@@ -76,6 +106,7 @@ public class LapCounter : NetworkBehaviour
         int currentCheckPoint;
         uint networkID = id.netId;
 
+
         try
         {
             currentCheckPoint = checkPointDict[networkID];
@@ -87,6 +118,8 @@ public class LapCounter : NetworkBehaviour
             currentCheckPoint = checkPointDict[networkID];
         }
 
+        if (finishedById[networkID]) return;
+
         // Verifica se o checkpoint eh o atual
         if (!checkPoints[currentCheckPoint].Equals(check)) return;
 
@@ -95,6 +128,16 @@ public class LapCounter : NetworkBehaviour
         var tempPlayerNameAndLap = lapDict[networkID];
         tempPlayerNameAndLap.score += 1; //currentCheckPoint == 0? 1 : 0;
         lapDict[networkID] = tempPlayerNameAndLap;
+
+        if(tempPlayerNameAndLap.score >= maxLaps * checkPoints.Count )
+        {
+            // Ganhou! 
+            finishedById[networkID] = true;
+
+            // Teleportar player para o podio!
+            id.GetComponent<PlayerKart>()?.SetWinState(winPositions[finishedPlayers].position, winPositions[finishedPlayers].rotation);
+            finishedPlayers += 1; 
+        }
         
 
         // Se nao, passar para o proximo checkpoint
