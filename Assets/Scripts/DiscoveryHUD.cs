@@ -14,10 +14,24 @@ namespace Mirror.Discovery
 
         public NetworkDiscovery networkDiscovery;
         
-        private string playerName = "Player".PadRight(26);
+        [SerializeField]
+        GameObject buttonTemplate;
+        
+        public string playerName { get; set; } = "Player".PadRight(26);
         private void StorePlayerName()
         {
             PlayerPrefs.SetString("playerName", playerName.Trim(' '));
+        }
+
+        /*static public void SetPlayerName(string newName)
+        {
+            Debug.Log(newName);
+            //playerName = newName;
+        }*/
+
+        private void Awake()
+        {
+            buttonTemplate?.SetActive(false);
         }
 
 #if UNITY_EDITOR
@@ -50,32 +64,24 @@ namespace Mirror.Discovery
 
             if (GUILayout.Button("Find Servers"))
             {
-                discoveredServers.Clear();
-                networkDiscovery.StartDiscovery();
+                FindServers();
             }
 
             // LAN Host
             if (GUILayout.Button("Start Host"))
             {
-                discoveredServers.Clear();
-                NetworkManager.singleton.StartHost();
-                networkDiscovery.AdvertiseServer();
-                StorePlayerName();
+                HostStart();
             }
 
             // Dedicated server
             if (GUILayout.Button("Start Server"))
             {
-                discoveredServers.Clear();
-                NetworkManager.singleton.StartServer();
-
-                networkDiscovery.AdvertiseServer();
-                StorePlayerName();
+                DedicatedServer();
             }
 
             GUILayout.Label("Nome do Jogador: ");
 
-            playerName = GUILayout.TextField(playerName,32);
+            //playerName = GUILayout.TextField(playerName,32);
 
             GUILayout.EndHorizontal();
 
@@ -93,6 +99,29 @@ namespace Mirror.Discovery
             GUILayout.EndScrollView();
         }
 
+        public void FindServers()
+        {
+            discoveredServers.Clear();
+            networkDiscovery.StartDiscovery();
+        }
+
+        public void DedicatedServer()
+        {
+            discoveredServers.Clear();
+            NetworkManager.singleton.StartServer();
+
+            networkDiscovery.AdvertiseServer();
+            StorePlayerName();
+        }
+
+        public void HostStart()
+        {
+            discoveredServers.Clear();
+            NetworkManager.singleton.StartHost();
+            networkDiscovery.AdvertiseServer();
+            StorePlayerName();
+        }
+
         void Connect(ServerResponse info)
         {
             StorePlayerName();
@@ -101,8 +130,20 @@ namespace Mirror.Discovery
 
         public void OnDiscoveredServer(ServerResponse info)
         {
+            /*if (discoveredServers.ContainsKey(info.serverId))
+                return;*/
             // Note that you can check the versioning to decide if you can connect to the server or not using this method
             discoveredServers[info.serverId] = info;
+
+            GameObject go = Instantiate(buttonTemplate) as GameObject;
+
+            go.SetActive(true);
+            UnityEngine.UI.Button button = go.GetComponent<UnityEngine.UI.Button>();
+            button.onClick.AddListener(delegate { Connect(info); });
+            TMPro.TextMeshProUGUI text = go.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+            text.SetText(info.EndPoint.Address.ToString());
+            // TB.SetName(str);
+            go.transform.SetParent(buttonTemplate.transform.parent);
         }
     }
 }
